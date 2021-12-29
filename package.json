@@ -1,6 +1,7 @@
 {
     "name": "mweb3-demo-waves",
     "version": "0.1.0",
+    "main": "index.js",
     "scripts": {
         "build": "webpack",
         "watch": "webpack --watch"
@@ -8,11 +9,15 @@
     "dependencies": {
         "@babel/preset-env": "^7.1.0",
         "@babel/preset-react": "^7.0.0",
+        "@waves.exchange/provider-web": "^1.1.1",
+        "@waves/provider-seed": "^0.1.1",
+        "@waves/signer": "^1.0.6",
+        "@waves/waves-transactions": "^4.2.5-beta.1",
         "babel": "^6.23.0",
         "babel-core": "^6.26.3",
+        "express": "^4.16.4",
         "react": "^16.5.2",
-        "react-dom": "^16.5.2",
-        "express": "^4.16.4"
+        "react-dom": "^16.5.2"
     },
     "devDependencies": {
         "@babel/core": "^7.1.2",
@@ -22,6 +27,5 @@
         "cross-env": "^5.2.0",
         "webpack": "^4.17.2",
         "webpack-cli": "^3.1.0"
-        
     }
 }
