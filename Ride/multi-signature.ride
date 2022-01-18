@@ -1,28 +1,32 @@
-{-# STDLIB_VERSION 3 #-}
+{-# STDLIB_VERSION 4 #-}
 {-# CONTENT_TYPE DAPP #-}
 {-# SCRIPT_TYPE ACCOUNT #-}
 
-let alicePubKey  = base58'rxxVt9daZZBr7ntnfKwnF1VZrTpNBB4pQNve5tyYSSW'
-let bobPubKey    = base58'2vmHtjTNLkTQ1z7XRRdWxrUTuXKHXsob3ii8MdckJ8ze'
-let cooperPubKey = base58'HQ253ezhxEjtpc2HQtT53kAer6bdxuLzr1pYWiqVxbAS'
+let alicePubKey = base58'rxxVt9daZZBr7ntnfKwnF1VZrTpNBB4pQNve5tyYSSW'
+let bobPubKey = base58'2vmHtjTNLkTQ1z7XRRdWxrUTuXKHXsob3ii8MdckJ8ze'
+let starkPubKey = base58'HQ253ezhxEjtpc2HQtT53kAer6bdxuLzr1pYWiqVxbAS'
+
+#total signatures needed
+let multiSigCount = 2
+
+#Check signature
+func checkSign(tx: Transaction, pubKey: ByteVector) = {
+    if(sigVerify(tx.bodyBytes, tx.proofs[0], pubKey) || sigVerify(tx.bodyBytes, tx.proofs[1], pubKey) || sigVerify(tx.bodyBytes, tx.proofs[2], pubKey)) then 1 else 0
+}
+
+#Check 3 pubKey
+func getMultiSigValue(tx: Transaction) = {
+    let aliceSig = checkSign(tx, alicePubKey)
+    let bobSig = checkSign(tx, bobPubKey)
+    let starkSig = checkSign(tx, starkPubKey)
+    aliceSig + bobSig + starkSig
+}
 
 @Verifier(tx)
 func verify() = {
-    let alice1 = sigVerify(tx.bodyBytes, tx.proofs[0], alicePubKey)
-    let alice2 = sigVerify(tx.bodyBytes, tx.proofs[1], alicePubKey)
-    let alice3 = sigVerify(tx.bodyBytes, tx.proofs[2], alicePubKey)
-
-    let bob1 = sigVerify(tx.bodyBytes, tx.proofs[0], bobPubKey)
-    let bob2 = sigVerify(tx.bodyBytes, tx.proofs[1], bobPubKey)
-    let bob3 = sigVerify(tx.bodyBytes, tx.proofs[2], bobPubKey)
-
-    let cooper1 = sigVerify(tx.bodyBytes, tx.proofs[0], cooperPubKey)
-    let cooper2 = sigVerify(tx.bodyBytes, tx.proofs[1], cooperPubKey)
-    let cooper3 = sigVerify(tx.bodyBytes, tx.proofs[2], cooperPubKey)
-
-    let aliceAndBob = (alice1 && bob2) || (alice1 && bob3) || (alice2 && bob1) || (alice2 && bob3) || (alice3 && bob1) || (alice3 && bob2)  
-        
-    match tx{
-        case _ => aliceAndBob
-    }
+    match tx {
+        case t: SetScriptTransaction => sigVerify(t.bodyBytes, t.proofs[0], alicePubKey) 
+        case td: TransferTransaction => getMultiSigValue(td) >= multiSigCount 
+        case _ => false 
+      }
 }
