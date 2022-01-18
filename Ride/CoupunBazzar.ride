@@ -1,0 +1,33 @@
+{-# STDLIB_VERSION 5 #-}
+{-# CONTENT_TYPE DAPP #-}
+{-# SCRIPT_TYPE ACCOUNT #-}
+
+let starkPublicKey = base58'HQ253ezhxEjtpc2HQtT53kAer6bdxuLzr1pYWiqVxbAS'
+let alicePublicKey = base58'rxxVt9daZZBr7ntnfKwnF1VZrTpNBB4pQNve5tyYSSW'
+
+@Callable(i)
+func purchase(name: String) = {
+  if(size(i.payments) > 0) then {
+        let payment = getElement(i.payments, 0)
+    if(isDefined(name)) then {
+        if(isDefined(payment.assetId)) then throw("Waves Only")
+          else {
+            let customerAddr = toBase58String(i.caller.bytes)
+            let price = match getInteger(this, "item_" + name + "_coupon_price") {
+                case t:Int => t
+                case _ => 0
+              }
+            if(price != 0) then {
+              if(payment.amount > price) then throw("payment cant be higher than price: " + price.toString())
+              else if(payment.amount < price) then throw("payment cant be less than price: " + price.toString())
+              else {
+                [
+                  StringEntry("status:purchase_item_" + name + "_customer_" + customerAddr, "confirmed"),
+                  IntegerEntry("price:purchase_item_" + name + "_customer_" + customerAddr, price)
+                ]
+              }
+            } else throw("Please enter valid coupon name: A or B")
+          }
+    } else throw("Coupon name should be present")
+  } else throw("Please attach payment")
+}
