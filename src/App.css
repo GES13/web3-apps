@@ -1,0 +1,9 @@
+.App {
+  text-align: left;
+  margin-top: 50px;
+}
+
+ul {
+  list-style-image: url("/bk.png");
+  text-align: -moz-left;
+}
